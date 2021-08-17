@@ -8,7 +8,7 @@ Requirements: bedtools v2.29.2 (though anything above v2 will *likely* work.)
 
 Run the code below to generate the following files
 ```
-bash get_intergenic.bash myintputgenome.gff
+bash get_intergenic.bash myinputgenome.gff
 ```
 
 The following files should be made
