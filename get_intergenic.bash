@@ -7,9 +7,9 @@ gff=$1
 name=${gff%.gff}
 sorted_gff=""$name".sorted.gff"
 gfile=""$name".genome"
-#sorted_gfile=""$name".sorted.genome"
+sorted_gfile=""$name".sorted.genome"
 bed_gff=""$name".bed" 
-#sorted_bed=""$name".sorted.bed"
+sorted_bed=""$name".sorted.bed"
 intergenic=""$name"_intergenic.bed"
 intergenic_stranded=""$name"_intergenic.stranded.bed"
 all_bed=""$name"_all_features.bed"
@@ -27,7 +27,10 @@ awk '($3!="region") {print}' $gff | bedtools sort -i stdin > $sorted_gff
 echo "-------------| Converting input GFF to BED formats and genome files"
 ### Create tab-delimited BED file skipping the genome entries (region): chrom, start(0),end(0-non-inclusive), name, score, strand ###
 awk -F '\t' '{printf("%s\t%d\t%s\t%s\t%s\t%s\t%s\t%s\n",$1,int($4)-1,$5,$9,$8,$7,$2,$3);}' $sorted_gff > $bed_gff
-awk -F '\t' '($3=="region") {printf("%s\t%d\n",$1,$5);}' $gff > $gfile  #make genome file using region entry that encompasses assembly.
+awk -F '\t' '($3=="region") {printf("%s\t%d\n",$1,int($5)-1);}' $gff > $gfile  #make genome file using region entry that encompasses assembly.
+
+#sort -k1,1 -k2,2n $bed > $sorted_bed
+#sort -k2,2n $gfile > $sorted_gfile  
 
 echo "-------------| Getting intergenic regions from sorted GFF"
 ### Get the complement by strand and merge into one file at the end, code obtained from https://www.biostars.org/p/117925/  ###
@@ -38,12 +41,17 @@ awk '($7=="+") {print}' $sorted_gff | bedtools complement -i stdin -g $gfile | s
 awk -F '\t' '{printf("%s\t%d\t%d\t%s\t%d\t%s\t%s\t%s\n", $1,$2,$3,".",0,$4,".",".");}' $intergenic | \
 bedtools sort -i stdin | bedtools subtract -s -a stdin -b $bed_gff | \
 awk -F '\t' '{printf("%s\t%d\t%d\t%s\t%d\t%s\t%s\t%s\n", $1,$2,$3,"ID=inter"NR,0,$6,"RefSeq","intergenic");}' | \
-cat - $bed_gff >  $all_bed_stranded #combine intergenic regions with original file
+bedtools sort -i stdin | \
+cat - $bed_gff | bedtools sort -i stdin >  $all_bed_stranded #combine intergenic regions with original file
 
+### Perform Bedtools complement but without any stranded information ###
+bedtools complement -i $bed_gff -g $gfile | 
+awk -F '\t' '{printf("%s\t%d\t%d\t%s\t%d\t%s\t%s\t%s\n", $1,$2,$3,"ID=inter"NR, 0," ","Refseq","intergenic");}' | \
+cat - $bed_gff | bedtools sort -i stdin > $all_bed   
 
-#echo "-------------| Converting BED outputs to GFF format"
+echo "-------------| Converting BED outputs to GFF format"
 ### Convert combined bed back into GFF format ###
-#awk -F '\t' '{printf("%s\t%s\t%s\t%d\t%s\t%s\t%s\t%s\t%s\n",$1,$7,$8,int($2)+1,$3,".",$6,$5,$4);}' $all_bed_stranded | bedtools sort -i stdin > $all_gff_stranded
-#awk -F '\t' '{printf("%s\t%s\t%s\t%d\t%s\t%s\t%s\t%s\t%s\n",$1,$7,$8,int($2)+1,$3,".",$6,$5,$4);}' $all_bed | bedtools sort -i stdin > $all_gff
+awk -F '\t' '{printf("%s\t%s\t%s\t%d\t%s\t%s\t%s\t%s\t%s\n",$1,$7,$8,int($2)+1,$3,".",$6,$5,$4);}' $all_bed_stranded | bedtools sort -i stdin > $all_gff_stranded
+awk -F '\t' '{printf("%s\t%s\t%s\t%d\t%s\t%s\t%s\t%s\t%s\n",$1,$7,$8,int($2)+1,$3,".",$6,$5,$4);}' $all_bed | bedtools sort -i stdin > $all_gff
 
 
