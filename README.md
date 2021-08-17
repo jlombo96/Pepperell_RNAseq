@@ -7,8 +7,9 @@ Code to perform intergenic RNA-seq analysis
 Requirements: bedtools v2.29.2 (though anything above v2 will *likely* work.) 
 
 Run the code below to generate the following files
-
-> bash get_intergenic.bash myintputgenome.gff
+```
+bash get_intergenic.bash myintputgenome.gff
+```
 
 The following files should be made
 |File	|Description	|
@@ -28,17 +29,18 @@ Try running this on your server to confirm bedtools is up-to-date and working. O
 #### Step 2: Make Windows (optional):
 
 Run the following code to generate windows from the output .sorted.genome from **Step 1**
-
-> bash makewindows myinputgenome.sorted.bed windowsize windowstep
-
+```
+bash makewindows.bash myinputgenome.sorted.bed windowsize windowstep
+```
 A file titled myinputgenome_windows_size{}_step{}.bed will be generated. This can be used to map RNA-seq reads to a sliding window in **Step 3**
 
 #### Step 3: Map RNA-seq reads to intervals via bedtools (for visual, preliminary results)
 
-Place the mapcoverage.bash in a folder containing your RNA-seq BAM files. **NOTE:** The following code may require the input BAM files to be sorted. You can do so with samtools sort. 
+Place the mapcoverage.bash in a folder containing your RNA-seq BAM files. **NOTE:** The following code may require the input BAM files to be sorted. You can do so with samtools sort.
 
-> bash mapcoverage.bash myintervalfile.{bed/gff/vcf}
-
+```
+bash mapcoverage.bash myintervalfile.{bed/gff/vcf}
+```
 Here you can use a feature file generated in **Step 1** (i.e. the .all_fatures.stranded.bed) or the sliding window file generated in **Step 2**. The script will loop through each of the sorted BAM files and report the read-depth across each interval in the provided file. The final column includes the name of the BAM file that generated the corresponding data (which can be pivoted to columns in R for downstream summary statistics). 
 
 The current bedtools coverage parameters will output the following results for each interval:
