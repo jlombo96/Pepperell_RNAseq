@@ -15,9 +15,7 @@ The following files should be made
 |---	|---	|
 |.sorted.gff	|	sorted input GFF	|
 |.genome	|	bedtools genome file describing chromosome sizes|
-|.sorted.genome	|	sorted input genome file	|
 |.bed	|	GFF file in BED format	|
-|.sorted.bed	|	sorted BED file	|
 |.intergenic.bed	|	intergenic regions from bedtools complement (non-stranded)|
 |.intergenic.stranded.bed	|	intergenic regions from bedtools complement(stranded)|
 |_all_features.bed	|	combined input GFF and intergenic regions in BED format|
